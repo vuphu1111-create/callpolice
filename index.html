@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cuộc gọi đi tới Chú Công An</title>
+    <style>
+        /* CSS tạo giao diện iPhone / Android Dark Mode */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            padding: 40px 20px 40px 20px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- MÀN HÌNH DANH BẠ (START SCREEN) --- */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+        .contact-header {
+            padding: 10px 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 500;
+            min-height: 44px;
+        }
+        .header-title { color: #ffffff; }
+
+        .account-box {
+            background: #1c1c1e;
+            margin: 10px 16px;
+            padding: 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+        }
+        .account-avatar {
+            width: 36px;
+            height: 36px;
+            background: #54749e;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 16px;
+        }
+        .contact-group-title {
+            color: #8e8e93;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 15px 0 8px 4px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 4px;
+            border-bottom: 1px solid #2c2c2e;
+            cursor: pointer;
+        }
+        .contact-item:active { background-color: #1c1c1e; }
+        .item-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .item-name { font-size: 17px; font-weight: 500; }
+        
+        .police-item {
+            background: rgba(0, 122, 255, 0.1);
+            border: 1px dashed rgba(0, 122, 255, 0.4);
+            border-radius: 12px;
+            margin: 5px 0;
+            padding: 12px 10px;
+        }
+        .bottom-nav {
+            background: #121212;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 20px 0;
+            border-top: 1px solid #2c2c2e;
+        }
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #8e8e93;
+            font-size: 11px;
+            gap: 4px;
+        }
+        .nav-tab.active {
+            color: #ffffff;
+            background: #2c2c2e;
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+
+        /* --- MÀN HÌNH CUỘC GỌI ĐI --- */
+        .info-container { text-align: center; width: 100%; }
+        .caller-name { font-size: 32px; font-weight: bold; margin-bottom: 8px; }
+        .call-status { font-size: 18px; color: #a6a6a6; min-height: 24px; }
+
+        .avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #333;
+            margin-top: 20px;
+        }
+
+        /* Khu vực hiển thị các tầng lựa chọn phản hồi */
+        .options-container {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+            margin: 20px auto 0 auto;
+        }
+        .btn-option {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-option:active { background-color: rgba(255, 255, 255, 0.25); }
+        
+        /* Điểm nhấn cho các nút tiến trình sau */
+        .btn-next-step {
+            background-color: rgba(0, 122, 255, 0.2);
+            border: 1px solid rgba(0, 122, 255, 0.4);
+        }
+        .btn-next-step:active { background-color: rgba(0, 122, 255, 0.4); }
+
+        /* Nút Tắt máy chính giữa */
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .btn {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.9); }
+        .btn-decline { background-color: #ff3b30; }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <div class="contact-header">
+            <span class="header-title">Danh bạ</span>
+        </div>
+
+        <div class="account-box">
+            <div class="account-avatar">👤</div>
+            <div style="font-weight: 500;">Anh họ</div>
+        </div>
+
+        <div class="contact-list">
+            <div class="contact-group-title">B</div>
+            <div class="contact-item">
+                <div class="item-avatar" style="background-color: #72c29b;">B</div>
+                <div class="item-name">Bà ngoại</div>
+            </div>
+            <div class="contact-item">
+                <div class="item-avatar" style="background-color: #5ca1e6;">B</div>
+                <div class="item-name">Bà nội</div>
+            </div>
+            <div class="contact-item">
+                <div class="item-avatar" style="background-color: #72c29b;">B</div>
+                <div class="item-name">Bảo Hiểm</div>
+            </div>
+            <div class="contact-item">
+                <div class="item-avatar" style="background-color: #f08a5d;">B</div>
+                <div class="item-name">Bình</div>
+            </div>
+
+            <div class="contact-group-title">C</div>
+            <div class="contact-item police-item" onclick="batDauGoiDi()">
+                <div class="item-avatar" style="background-color: #007aff;">👮‍♂️</div>
+                <div class="item-name" style="color: #007aff; font-weight: bold;">Chú công an</div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-tab"><span>⁙</span><span>Bàn phím</span></div>
+            <div class="nav-tab"><span>📞</span><span>Gần đây</span></div>
+            <div class="nav-tab active"><span>👤</span><span>Danh bạ</span></div>
+        </div>
+    </div>
+
+    <div class="info-container">
+        <div class="caller-name">Chú Công An 👮‍♂️</div>
+        <div id="status" class="call-status">Đang gọi...</div>
+        <img class="avatar" src="avatar.jpg" alt="Chú công an">
+        
+        <div id="options-step-1" class="options-container">
+            <button class="btn-option" onclick="chonKhaiBao()">Đã Khai báo xong</button>
+            <button class="btn-option" onclick="chonNgoanRoi()">Con tôi đã ngoan rồi</button>
+        </div>
+
+        <div id="options-step-2" class="options-container">
+            <button class="btn-option btn-next-step" onclick="chonDaKhaiBaoXong()">Đã khai báo xong</button>
+        </div>
+
+        <div id="options-step-3" class="options-container">
+            <button class="btn-option btn-next-step" onclick="chonDaChuyenMay()">Đã chuyển máy</button>
+        </div>
+    </div>
+
+    <div class="buttons-container">
+        <button id="decline-btn" class="btn btn-decline" onclick="tắtMay()">Hủy</button>
+    </div>
+
+    <audio id="audio-chuong" src="chuong.mp3" loop></audio>
+    <audio id="audio-1" src="1.mp3"></audio>
+    <audio id="audio-2" src="2.mp3"></audio>
+    <audio id="audio-2-1" src="2-1.mp3"></audio>
+    <audio id="audio-2-2" src="2-2.mp3"></audio>
+    <audio id="audio-3" src="3.mp3"></audio>
+
+    <script>
+        const audioChuong = document.getElementById('audio-chuong');
+        const audio1 = document.getElementById('audio-1');
+        const audio2 = document.getElementById('audio-2');
+        const audio2_1 = document.getElementById('audio-2-1');
+        const audio2_2 = document.getElementById('audio-2-2');
+        const audio3 = document.getElementById('audio-3');
+        
+        const txtStatus = document.getElementById('status');
+        const btnDecline = document.getElementById('decline-btn');
+        
+        const optStep1 = document.getElementById('options-step-1');
+        const optStep2 = document.getElementById('options-step-2');
+        const optStep3 = document.getElementById('options-step-3');
+        
+        let intervalDemGiay;
+        let timeoutKetNoi;
+
+        // 1. Bấm gọi từ danh bạ
+        function batDauGoiDi() {
+            document.getElementById('start-screen').style.display = 'none';
+            txtStatus.innerText = "Đang gọi...";
+            btnDecline.innerText = "Hủy";
+            audioChuong.play().catch(e => console.log(e));
+
+            // Giả lập 3 giây đổ chuông chờ máy
+            timeoutKetNoi = setTimeout(() => {
+                cuocGoiDaKetNoi();
+            }, 3000); 
+        }
+
+        // 2. Bên kia nhấc máy
+        function cuocGoiDaKetNoi() {
+            audioChuong.pause();
+            audioChuong.currentTime = 0;
+            
+            audio1.play();
+            btnDecline.innerText = "Tắt máy";
+            optStep1.style.display = 'flex'; // Hiện nút "Đã khai báo thông tin con" & "Con tôi đã ngoan rồi"
+            
+            let soGiay = 0;
+            txtStatus.innerText = "00:00";
+            intervalDemGiay = setInterval(() => {
+                soGiay++;
+                let phut = Math.floor(soGiay / 60).toString().padStart(2, '0');
+                let giay = (soGiay % 60).toString().padStart(2, '0');
+                txtStatus.innerText = `${phut}:${giay}`;
+            }, 1000);
+        }
+
+        // 3. Ấn chọn kịch bản "Khai báo"
+        function chonKhaiBao() {
+            audio1.pause();
+            audio1.currentTime = 0;
+            
+            optStep1.style.display = 'none';
+            optStep2.style.display = 'flex'; // Hiện phím chọn "Đã khai báo tình trạng"
+            
+            audio2.play(); // Đồng thời phát file 2.mp3
+        }
+
+        // 4. Ấn chọn "Đã khai báo xong"
+        function chonDaKhaiBaoXong() {
+            audio2.pause();
+            audio2.currentTime = 0;
+            
+            optStep2.style.display = 'none';
+            optStep3.style.display = 'flex'; // Hiện phím chọn "Đã chuyển máy"
+            
+            audio2_1.play(); // Đồng thời phát file 2-1.mp3
+        }
+
+        // 5. Ấn chọn "Đã chuyển máy"
+        function chonDaChuyenMay() {
+            audio2_1.pause();
+            audio2_1.currentTime = 0;
+            
+            optStep3.style.display = 'none';
+            
+            audio2_2.play(); // Phát kịch bản cuối cùng
+            audio2_2.onended = function() {
+                tắtMay(); // Kết thúc hoàn toàn cuộc gọi
+            };
+        }
+
+        // Nhánh phụ: Chọn "Con tôi đã ngoan rồi"
+        function chonNgoanRoi() {
+            audio1.pause();
+            audio1.currentTime = 0;
+            optStep1.style.display = 'none';
+            
+            audio3.play();
+            audio3.onended = function() {
+                tắtMay();
+            };
+        }
+
+        // Tắt máy chủ động hoặc bị động kết thúc
+        function tắtMay() {
+            clearTimeout(timeoutKetNoi);
+            clearInterval(intervalDemGiay);
+
+            audioChuong.pause();
+            audio1.pause();
+            audio2.pause();
+            audio2_1.pause();
+            audio2_2.pause();
+            audio3.pause();
+            
+            txtStatus.innerText = "Cuộc gọi đã kết thúc";
+            optStep1.style.display = 'none';
+            optStep2.style.display = 'none';
+            optStep3.style.display = 'none';
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
