@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cuộc gọi đi tới Chú Công An</title>
     <style>
-        /* CSS tạo giao diện iPhone / Android Dark Mode */
+        /* CSS tối ưu hiển thị đồng bộ cho iPhone và Android */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background-color: #1a1a1a;
@@ -16,7 +16,8 @@
             justify-content: space-between;
             align-items: center;
             height: 100vh;
-            padding: 40px 20px 40px 20px;
+            height: 100dvh; /* Tự động tính toán chiều cao chính xác trên trình duyệt Android di động */
+            padding: 30px 20px 50px 20px; /* Tăng padding bottom để né thanh điều hướng của Android */
             overflow: hidden;
             user-select: none;
         }
@@ -28,7 +29,7 @@
             z-index: 100;
             display: flex;
             flex-direction: column;
-            padding: 20px 0;
+            padding: 20px 0 0 0;
         }
         .contact-header {
             padding: 10px 24px;
@@ -106,7 +107,7 @@
             background: #121212;
             display: flex;
             justify-content: space-around;
-            padding: 10px 0 20px 0;
+            padding: 10px 0 35px 0; /* Tối ưu khoảng cách đệm phía dưới thanh nav trên Android */
             border-top: 1px solid #2c2c2e;
         }
         .nav-tab {
@@ -125,9 +126,18 @@
         }
 
         /* --- MÀN HÌNH CUỘC GỌI ĐI --- */
-        .info-container { text-align: center; width: 100%; }
+        .info-container { 
+            text-align: center; 
+            width: 100%; 
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 20px;
+        }
         .caller-name { font-size: 32px; font-weight: bold; margin-bottom: 8px; }
-        .call-status { font-size: 18px; color: #a6a6a6; min-height: 24px; }
+        .call-status { font-size: 18px; color: #a6a6a6; min-height: 24px; margin-bottom: 20px; }
 
         .avatar {
             width: 140px;
@@ -135,7 +145,7 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #333;
-            margin-top: 20px;
+            margin-bottom: 30px;
         }
 
         /* Khu vực hiển thị các tầng lựa chọn phản hồi */
@@ -145,7 +155,7 @@
             gap: 12px;
             width: 100%;
             max-width: 320px;
-            margin: 20px auto 0 auto;
+            margin: 0 auto;
         }
         .btn-option {
             background-color: rgba(255, 255, 255, 0.1);
@@ -159,20 +169,20 @@
         }
         .btn-option:active { background-color: rgba(255, 255, 255, 0.25); }
         
-        /* Điểm nhấn cho các nút tiến trình sau */
         .btn-next-step {
             background-color: rgba(0, 122, 255, 0.2);
             border: 1px solid rgba(0, 122, 255, 0.4);
         }
         .btn-next-step:active { background-color: rgba(0, 122, 255, 0.4); }
 
-        /* Nút Tắt máy chính giữa */
+        /* Nút Tắt máy chính giữa - Đảm bảo cố định khoảng cách ở đáy */
         .buttons-container {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
             max-width: 400px;
+            padding-bottom: 10px;
         }
 
         .btn {
@@ -286,27 +296,24 @@
         let intervalDemGiay;
         let timeoutKetNoi;
 
-        // 1. Bấm gọi từ danh bạ
         function batDauGoiDi() {
             document.getElementById('start-screen').style.display = 'none';
             txtStatus.innerText = "Đang gọi...";
             btnDecline.innerText = "Hủy";
             audioChuong.play().catch(e => console.log(e));
 
-            // Giả lập 3 giây đổ chuông chờ máy
             timeoutKetNoi = setTimeout(() => {
                 cuocGoiDaKetNoi();
             }, 3000); 
         }
 
-        // 2. Bên kia nhấc máy
         function cuocGoiDaKetNoi() {
             audioChuong.pause();
             audioChuong.currentTime = 0;
             
             audio1.play();
             btnDecline.innerText = "Tắt máy";
-            optStep1.style.display = 'flex'; // Hiện nút "Đã khai báo thông tin con" & "Con tôi đã ngoan rồi"
+            optStep1.style.display = 'flex';
             
             let soGiay = 0;
             txtStatus.innerText = "00:00";
@@ -318,54 +325,42 @@
             }, 1000);
         }
 
-        // 3. Ấn chọn kịch bản "Khai báo"
         function chonKhaiBao() {
             audio1.pause();
             audio1.currentTime = 0;
-            
             optStep1.style.display = 'none';
-            optStep2.style.display = 'flex'; // Hiện phím chọn "Đã khai báo tình trạng"
-            
-            audio2.play(); // Đồng thời phát file 2.mp3
+            optStep2.style.display = 'flex';
+            audio2.play();
         }
 
-        // 4. Ấn chọn "Đã khai báo xong"
         function chonDaKhaiBaoXong() {
             audio2.pause();
             audio2.currentTime = 0;
-            
             optStep2.style.display = 'none';
-            optStep3.style.display = 'flex'; // Hiện phím chọn "Đã chuyển máy"
-            
-            audio2_1.play(); // Đồng thời phát file 2-1.mp3
+            optStep3.style.display = 'flex';
+            audio2_1.play();
         }
 
-        // 5. Ấn chọn "Đã chuyển máy"
         function chonDaChuyenMay() {
             audio2_1.pause();
             audio2_1.currentTime = 0;
-            
             optStep3.style.display = 'none';
-            
-            audio2_2.play(); // Phát kịch bản cuối cùng
+            audio2_2.play();
             audio2_2.onended = function() {
-                tắtMay(); // Kết thúc hoàn toàn cuộc gọi
+                tắtMay();
             };
         }
 
-        // Nhánh phụ: Chọn "Con tôi đã ngoan rồi"
         function chonNgoanRoi() {
             audio1.pause();
             audio1.currentTime = 0;
             optStep1.style.display = 'none';
-            
             audio3.play();
             audio3.onended = function() {
                 tắtMay();
             };
         }
 
-        // Tắt máy chủ động hoặc bị động kết thúc
         function tắtMay() {
             clearTimeout(timeoutKetNoi);
             clearInterval(intervalDemGiay);
