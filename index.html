@@ -2,24 +2,35 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Cuộc gọi đi tới Chú Công An</title>
     <style>
-        /* CSS tối ưu hiển thị đồng bộ cho iPhone và Android */
+        /* CSS tối ưu hiển thị đồng bộ cho cả iPhone và các dòng Android màn hình siêu dài như S25 Ultra */
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
             background-color: #1a1a1a;
             color: white;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Khung bọc tổng thể cuộc gọi - Khắc phục lỗi kéo giãn quá đà trên S25 Ultra */
+        .phone-call-wrapper {
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            height: 100vh;
-            height: 100dvh; /* Tự động tính toán chiều cao chính xác trên trình duyệt Android di động */
-            padding: 30px 20px 50px 20px; /* Tăng padding bottom để né thanh điều hướng của Android */
-            overflow: hidden;
-            user-select: none;
+            padding: 40px 24px calc(30px + env(safe-area-inset-bottom)); /* Bảo vệ vùng nút bấm tránh thanh điều hướng Android/iOS */
+            position: relative;
         }
 
         /* --- MÀN HÌNH DANH BẠ (START SCREEN) --- */
@@ -29,7 +40,7 @@
             z-index: 100;
             display: flex;
             flex-direction: column;
-            padding: 20px 0 0 0;
+            padding-top: env(safe-area-inset-top, 20px);
         }
         .contact-header {
             padding: 10px 24px;
@@ -107,7 +118,7 @@
             background: #121212;
             display: flex;
             justify-content: space-around;
-            padding: 10px 0 35px 0; /* Tối ưu khoảng cách đệm phía dưới thanh nav trên Android */
+            padding: 10px 0 calc(20px + env(safe-area-inset-bottom, 15px)) 0;
             border-top: 1px solid #2c2c2e;
         }
         .nav-tab {
@@ -129,15 +140,13 @@
         .info-container { 
             text-align: center; 
             width: 100%; 
-            flex-grow: 1; 
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
-            padding-top: 20px;
+            margin-top: 20px;
         }
-        .caller-name { font-size: 32px; font-weight: bold; margin-bottom: 8px; }
-        .call-status { font-size: 18px; color: #a6a6a6; min-height: 24px; margin-bottom: 20px; }
+        .caller-name { font-size: 32px; font-weight: bold; margin-bottom: 6px; }
+        .call-status { font-size: 18px; color: #a6a6a6; min-height: 24px; margin-bottom: 24px; }
 
         .avatar {
             width: 140px;
@@ -145,7 +154,7 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #333;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         /* Khu vực hiển thị các tầng lựa chọn phản hồi */
@@ -161,9 +170,10 @@
             background-color: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 14px;
-            border-radius: 12px;
+            padding: 15px;
+            border-radius: 14px;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
             text-align: center;
         }
@@ -175,29 +185,30 @@
         }
         .btn-next-step:active { background-color: rgba(0, 122, 255, 0.4); }
 
-        /* Nút Tắt máy chính giữa - Đảm bảo cố định khoảng cách ở đáy */
+        /* Khối cố định nút bấm ở đáy màn hình */
         .buttons-container {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
             max-width: 400px;
-            padding-bottom: 10px;
+            margin-bottom: 20px; /* Đẩy hẳn nút lên cách xa mép dưới máy Android */
         }
 
         .btn {
-            width: 75px;
-            height: 75px;
+            width: 76px;
+            height: 76px;
             border-radius: 50%;
             border: none;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
         .btn:active { transform: scale(0.9); }
         .btn-decline { background-color: #ff3b30; }
@@ -205,70 +216,74 @@
 </head>
 <body>
 
-    <div id="start-screen">
-        <div class="contact-header">
-            <span class="header-title">Danh bạ</span>
-        </div>
+    <div class="phone-call-wrapper">
 
-        <div class="account-box">
-            <div class="account-avatar">👤</div>
-            <div style="font-weight: 500;">Anh họ</div>
-        </div>
-
-        <div class="contact-list">
-            <div class="contact-group-title">B</div>
-            <div class="contact-item">
-                <div class="item-avatar" style="background-color: #72c29b;">B</div>
-                <div class="item-name">Bà ngoại</div>
-            </div>
-            <div class="contact-item">
-                <div class="item-avatar" style="background-color: #5ca1e6;">B</div>
-                <div class="item-name">Bà nội</div>
-            </div>
-            <div class="contact-item">
-                <div class="item-avatar" style="background-color: #72c29b;">B</div>
-                <div class="item-name">Bảo Hiểm</div>
-            </div>
-            <div class="contact-item">
-                <div class="item-avatar" style="background-color: #f08a5d;">B</div>
-                <div class="item-name">Bình</div>
+        <div id="start-screen">
+            <div class="contact-header">
+                <span class="header-title">Danh bạ</span>
             </div>
 
-            <div class="contact-group-title">C</div>
-            <div class="contact-item police-item" onclick="batDauGoiDi()">
-                <div class="item-avatar" style="background-color: #007aff;">👮‍♂️</div>
-                <div class="item-name" style="color: #007aff; font-weight: bold;">Chú công an</div>
+            <div class="account-box">
+                <div class="account-avatar">👤</div>
+                <div style="font-weight: 500;">Anh họ</div>
+            </div>
+
+            <div class="contact-list">
+                <div class="contact-group-title">B</div>
+                <div class="contact-item">
+                    <div class="item-avatar" style="background-color: #72c29b;">B</div>
+                    <div class="item-name">Bà ngoại</div>
+                </div>
+                <div class="contact-item">
+                    <div class="item-avatar" style="background-color: #5ca1e6;">B</div>
+                    <div class="item-name">Bà nội</div>
+                </div>
+                <div class="contact-item">
+                    <div class="item-avatar" style="background-color: #72c29b;">B</div>
+                    <div class="item-name">Bảo Hiểm</div>
+                </div>
+                <div class="contact-item">
+                    <div class="item-avatar" style="background-color: #f08a5d;">B</div>
+                    <div class="item-name">Bình</div>
+                </div>
+
+                <div class="contact-group-title">C</div>
+                <div class="contact-item police-item" onclick="batDauGoiDi()">
+                    <div class="item-avatar" style="background-color: #007aff;">👮‍♂️</div>
+                    <div class="item-name" style="color: #007aff; font-weight: bold;">Chú công an</div>
+                </div>
+            </div>
+
+            <div class="bottom-nav">
+                <div class="nav-tab"><span>⁙</span><span>Bàn phím</span></div>
+                <div class="nav-tab"><span>📞</span><span>Gần đây</span></div>
+                <div class="nav-tab active"><span>👤</span><span>Danh bạ</span></div>
             </div>
         </div>
 
-        <div class="bottom-nav">
-            <div class="nav-tab"><span>⁙</span><span>Bàn phím</span></div>
-            <div class="nav-tab"><span>📞</span><span>Gần đây</span></div>
-            <div class="nav-tab active"><span>👤</span><span>Danh bạ</span></div>
-        </div>
-    </div>
+        <div class="info-container">
+            <div class="caller-name">Chú Công An 👮‍♂️</div>
+            <div id="status" class="call-status">Đang gọi...</div>
+            <img class="avatar" src="avatar.jpg" alt="Chú công an">
+            
+            <div id="options-step-1" class="options-container">
+                <button class="btn-option" onclick="chonKhaiBao()">Đã Khai báo xong</button>
+                <button class="btn-option" onclick="chonNgoanRoi()">Con tôi đã ngoan rồi</button>
+            </div>
 
-    <div class="info-container">
-        <div class="caller-name">Chú Công An 👮‍♂️</div>
-        <div id="status" class="call-status">Đang gọi...</div>
-        <img class="avatar" src="avatar.jpg" alt="Chú công an">
-        
-        <div id="options-step-1" class="options-container">
-            <button class="btn-option" onclick="chonKhaiBao()">Đã Khai báo xong</button>
-            <button class="btn-option" onclick="chonNgoanRoi()">Con tôi đã ngoan rồi</button>
-        </div>
+            <div id="options-step-2" class="options-container">
+                <button class="btn-option btn-next-step" onclick="chonDaKhaiBaoXong()">Đã khai báo xong</button>
+            </div>
 
-        <div id="options-step-2" class="options-container">
-            <button class="btn-option btn-next-step" onclick="chonDaKhaiBaoXong()">Đã khai báo xong</button>
+            <div id="options-step-3" class="options-container">
+                <button class="btn-option btn-next-step" onclick="chonDaChuyenMay()">Đã chuyển máy</button>
+            </div>
         </div>
 
-        <div id="options-step-3" class="options-container">
-            <button class="btn-option btn-next-step" onclick="chonDaChuyenMay()">Đã chuyển máy</button>
+        <div class="buttons-container">
+            <button id="decline-btn" class="btn btn-decline" onclick="tắtMay()">Hủy</button>
         </div>
-    </div>
 
-    <div class="buttons-container">
-        <button id="decline-btn" class="btn btn-decline" onclick="tắtMay()">Hủy</button>
     </div>
 
     <audio id="audio-chuong" src="chuong.mp3" loop></audio>
